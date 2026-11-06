@@ -1,0 +1,33 @@
+name: Unzip Universal ZIP
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract ZIP file automatically
+        run: |
+          ZIP_FILE=$(find . -maxdepth 1 -name "*.zip" | head -n 1)
+          if [ -n "$ZIP_FILE" ]; then
+            echo "A extrair $ZIP_FILE..."
+            unzip -o "$ZIP_FILE" -d ./
+            rm -f "$ZIP_FILE"
+          else
+            echo "Erro: Nenhum ficheiro .zip encontrado na raiz!"
+            exit 1
+          fi
+
+      - name: Commit extracted files
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Auto-extrair pacote ZIP na raiz"
+          branch: ${{ github.ref_name }}
+          skip_ci: true
